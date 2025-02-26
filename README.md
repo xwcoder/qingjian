@@ -28,4 +28,4 @@
 Repository, 即仓库，可以类比 git/github repository 的概念。它是一组笔记、笔记目录的存储。物理上它对应一个文件夹。
 
 ## 功能
-TBC
+[青简 PRD](./prd.md) (使用 ChatGPT canvas 生成)
