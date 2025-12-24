@@ -32,6 +32,13 @@
 - [ ] CHK005 Item with specific criteria
 - [ ] CHK006 Final item in this category
 
+## Constitution Compliance（必选）
+
+- [ ] CHK007 跨端一致性：macOS+iOS 的信息架构/术语/交互语义/错误语义一致
+- [ ] CHK008 性能预算：关键路径指标已定义且有测量方式；无未解释的性能回退
+- [ ] CHK009 离线与可移植：Markdown 源数据语义不被破坏；同步/iCloud 冲突可恢复
+- [ ] CHK010 可访问性：暗色模式/可读性/辅助功能路径检查通过（按平台）
+
 ## Notes
 
 - Check items off as completed: `[x]`

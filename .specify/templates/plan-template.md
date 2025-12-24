@@ -31,7 +31,11 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- **跨端一致性（macOS+iOS）**：信息架构、术语、交互语义、错误语义一致；允许控件风格不同但行为一致
+- **性能预算**：为关键路径写清指标与测量方式（冷启动/打开仓库/打开笔记/输入延迟/滚动/图片渲染）
+- **零回归策略**：若存在回退，必须有原因、兜底与修复计划，并记录在本 plan
+- **离线与可移植**：Markdown 作为源数据；无网可用；同步/iCloud 不改变语义且冲突可恢复
+- **可访问性**：暗色模式、可读性（动态字体或等价策略）、VoiceOver/键盘路径（按平台）
 
 ## Project Structure
 

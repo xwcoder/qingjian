@@ -8,7 +8,10 @@ description: "Task list template for feature implementation"
 **Input**: Design documents from `/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
+**Tests**: 测试任务需要遵循项目宪法（`.specify/memory/constitution.md`）。
+- 对**共享核心/数据/同步语义**的变更：**MUST** 至少包含单元测试或集成测试任务
+- 对**UI 行为**的变更：**MUST** 提供可回归的验证任务（UI 测试/快照/或明确的手工检查清单）
+- 若确需豁免测试：**MUST** 在 tasks.md 中写明原因、风险与补齐计划
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -153,7 +156,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Code cleanup and refactoring
 - [ ] TXXX Performance optimization across all stories
-- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
+- [ ] TXXX [P] Additional unit tests (as required by constitution) in tests/unit/
 - [ ] TXXX Security hardening
 - [ ] TXXX Run quickstart.md validation
 
