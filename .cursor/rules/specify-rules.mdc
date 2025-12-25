@@ -3,6 +3,7 @@
 Auto-generated from all feature plans. Last updated: 2025-12-25
 
 ## Active Technologies
+- Swift 6+ + SwiftUI、Foundation（文件 I/O）、UniformTypeIdentifiers（文件选择）、XCTest（共享核心测试） (002-open-existing-repo)
 
 - Swift 6+ + SwiftUI（跨端 UI）、Foundation（文件 I/O）、XCTest（单元/集成测试）；其它依赖在 Phase 0 研究后收敛（例如 Markdown 渲染方案） (001-qingjian-markdown-notes)
 
@@ -22,6 +23,7 @@ tests/
 Swift 6+: Follow standard conventions
 
 ## Recent Changes
+- 002-open-existing-repo: Added Swift 6+ + SwiftUI、Foundation（文件 I/O）、UniformTypeIdentifiers（文件选择）、XCTest（共享核心测试）
 
 - 001-qingjian-markdown-notes: Added Swift 6+ + SwiftUI（跨端 UI）、Foundation（文件 I/O）、XCTest（单元/集成测试）；其它依赖在 Phase 0 研究后收敛（例如 Markdown 渲染方案）
 

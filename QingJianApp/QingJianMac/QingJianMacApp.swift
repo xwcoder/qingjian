@@ -11,10 +11,12 @@ import QingJianCore
 @main
 struct QingJianMacApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject private var appState = AppState()
     
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(appState)
         }
         .windowStyle(.automatic)
         .commands {
@@ -24,8 +26,15 @@ struct QingJianMacApp: App {
                 }
                 .keyboardShortcut("n", modifiers: .command)
                 
+                Divider()
+                
+                Button("新建仓库...") {
+                    appState.showingCreateRepoSheet = true
+                }
+                .keyboardShortcut("n", modifiers: [.command, .shift])
+                
                 Button("打开仓库...") {
-                    // TODO: Implement open repo
+                    appState.showingOpenRepoSheet = true
                 }
                 .keyboardShortcut("o", modifiers: [.command, .shift])
             }
@@ -45,6 +54,14 @@ struct QingJianMacApp: App {
             SettingsView()
         }
     }
+}
+
+// MARK: - App State（用于菜单命令与视图通信）
+
+@MainActor
+class AppState: ObservableObject {
+    @Published var showingCreateRepoSheet = false
+    @Published var showingOpenRepoSheet = false
 }
 
 // MARK: - App Delegate

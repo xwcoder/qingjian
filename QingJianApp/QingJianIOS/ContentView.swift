@@ -35,21 +35,31 @@ class MainViewModel: ObservableObject {
     @Published var error: String?
     @Published var showingError = false
     
-    private let repoUseCases = RepoUseCases()
+    private let repoUseCases: RepoUseCases
     
     init() {
+        // 使用持久化存储初始化
+        let registryStore = try? JSONRepoRegistryStore.defaultStore()
+        self.repoUseCases = RepoUseCases(registryStore: registryStore)
+        
         Task {
+            await loadFromRegistry()
             await loadRepos()
         }
+    }
+    
+    private func loadFromRegistry() async {
+        try? await repoUseCases.loadFromRegistry()
     }
     
     func loadRepos() async {
         repos = await repoUseCases.listRepos()
     }
     
-    func addRepo(url: URL, name: String) async {
+    /// 新建仓库（createRepo 语义：确保元信息存在）
+    func createRepo(url: URL, name: String) async {
         do {
-            _ = try await repoUseCases.addRepo(rootURL: url, displayName: name)
+            _ = try await repoUseCases.createRepo(rootURL: url, displayName: name)
             await loadRepos()
         } catch {
             self.error = error.localizedDescription
@@ -57,9 +67,36 @@ class MainViewModel: ObservableObject {
         }
     }
     
+    /// 打开已有仓库（openRepo 语义：必须含有效元信息）
+    func openRepo(url: URL, name: String) async {
+        do {
+            _ = try await repoUseCases.openRepo(rootURL: url, displayName: name)
+            await loadRepos()
+        } catch {
+            self.error = error.localizedDescription
+            self.showingError = true
+        }
+    }
+    
+    /// 兼容入口（默认走 createRepo）
+    func addRepo(url: URL, name: String) async {
+        await createRepo(url: url, name: name)
+    }
+    
     func removeRepo(id: String) async {
         do {
             try await repoUseCases.removeRepo(id: id)
+            await loadRepos()
+        } catch {
+            self.error = error.localizedDescription
+            self.showingError = true
+        }
+    }
+    
+    /// 重新定位仓库 (T036)
+    func relinkRepo(id: String, newURL: URL) async {
+        do {
+            try await repoUseCases.relinkRepo(id: id, newRootURL: newURL)
             await loadRepos()
         } catch {
             self.error = error.localizedDescription
@@ -72,7 +109,8 @@ class MainViewModel: ObservableObject {
 
 struct RepoListView: View {
     @ObservedObject var viewModel: MainViewModel
-    @State private var showingAddRepo = false
+    @State private var showingCreateRepo = false
+    @State private var showingOpenRepo = false
     
     var body: some View {
         NavigationStack {
@@ -88,7 +126,7 @@ struct RepoListView: View {
                         NavigationLink {
                             RepoDetailView(repo: repo)
                         } label: {
-                            RepoRowView(repo: repo)
+                            RepoRowView(repo: repo, viewModel: viewModel)
                         }
                     }
                     .onDelete { indexSet in
@@ -104,8 +142,18 @@ struct RepoListView: View {
             .navigationTitle("青简")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showingAddRepo = true
+                    Menu {
+                        Button {
+                            showingCreateRepo = true
+                        } label: {
+                            Label("新建仓库", systemImage: "folder.badge.plus")
+                        }
+                        
+                        Button {
+                            showingOpenRepo = true
+                        } label: {
+                            Label("打开仓库", systemImage: "folder")
+                        }
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -114,8 +162,11 @@ struct RepoListView: View {
             .refreshable {
                 await viewModel.loadRepos()
             }
-            .sheet(isPresented: $showingAddRepo) {
-                AddRepoView(viewModel: viewModel, isPresented: $showingAddRepo)
+            .sheet(isPresented: $showingCreateRepo) {
+                CreateRepoView(viewModel: viewModel, isPresented: $showingCreateRepo)
+            }
+            .sheet(isPresented: $showingOpenRepo) {
+                OpenRepoView(viewModel: viewModel, isPresented: $showingOpenRepo)
             }
             .alert("错误", isPresented: $viewModel.showingError) {
                 Button("确定") {}
@@ -130,6 +181,8 @@ struct RepoListView: View {
 
 struct RepoRowView: View {
     let repo: RepoSummary
+    @ObservedObject var viewModel: MainViewModel
+    @State private var showingRelinkPicker = false
     
     var body: some View {
         HStack(spacing: 12) {
@@ -143,19 +196,43 @@ struct RepoRowView: View {
                     .font(.headline)
                 
                 if !repo.isAvailable {
-                    Text("不可用")
+                    HStack(spacing: 8) {
+                        Text("不可用")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                        
+                        Button("重新定位") {
+                            showingRelinkPicker = true
+                        }
                         .font(.caption)
-                        .foregroundStyle(.orange)
+                        .buttonStyle(.borderless)
+                    }
                 }
             }
         }
         .padding(.vertical, 4)
+        .fileImporter(
+            isPresented: $showingRelinkPicker,
+            allowedContentTypes: [.folder],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                if let url = urls.first {
+                    Task {
+                        await viewModel.relinkRepo(id: repo.id, newURL: url)
+                    }
+                }
+            case .failure:
+                break
+            }
+        }
     }
 }
 
-// MARK: - Add Repo View
+// MARK: - Create Repo View（新建仓库）
 
-struct AddRepoView: View {
+struct CreateRepoView: View {
     @ObservedObject var viewModel: MainViewModel
     @Binding var isPresented: Bool
     @State private var selectedURL: URL?
@@ -186,6 +263,8 @@ struct AddRepoView: View {
                     .foregroundStyle(.primary)
                 } header: {
                     Text("仓库位置")
+                } footer: {
+                    Text("选择一个空文件夹或现有目录，将其初始化为青简仓库")
                 }
                 
                 Section {
@@ -196,7 +275,7 @@ struct AddRepoView: View {
                     Text("留空将使用文件夹名称")
                 }
             }
-            .navigationTitle("添加仓库")
+            .navigationTitle("新建仓库")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -206,10 +285,10 @@ struct AddRepoView: View {
                 }
                 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("添加") {
+                    Button("新建") {
                         guard let url = selectedURL else { return }
                         Task {
-                            await viewModel.addRepo(
+                            await viewModel.createRepo(
                                 url: url,
                                 name: repoName.isEmpty ? url.lastPathComponent : repoName
                             )
@@ -230,6 +309,116 @@ struct AddRepoView: View {
                         selectedURL = url
                         if repoName.isEmpty {
                             repoName = url.lastPathComponent
+                        }
+                    }
+                case .failure:
+                    break
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Open Repo View（打开已有仓库）
+
+struct OpenRepoView: View {
+    @ObservedObject var viewModel: MainViewModel
+    @Binding var isPresented: Bool
+    @State private var selectedURL: URL?
+    @State private var repoName: String = ""
+    @State private var showingFilePicker = false
+    @State private var validationError: String?
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    Button {
+                        showingFilePicker = true
+                    } label: {
+                        HStack {
+                            Text("选择仓库文件夹")
+                            Spacer()
+                            if let url = selectedURL {
+                                Text(url.lastPathComponent)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("未选择")
+                                    .foregroundStyle(.secondary)
+                            }
+                            Image(systemName: "chevron.right")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .foregroundStyle(.primary)
+                    
+                    if let error = validationError {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+                } header: {
+                    Text("仓库位置")
+                } footer: {
+                    Text("选择一个包含 .qingjian_metadata.json 的已有仓库目录")
+                }
+                
+                Section {
+                    TextField("显示名称", text: $repoName)
+                } header: {
+                    Text("显示名称（可选）")
+                } footer: {
+                    Text("留空将使用文件夹名称")
+                }
+            }
+            .navigationTitle("打开仓库")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("取消") {
+                        isPresented = false
+                    }
+                }
+                
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("打开") {
+                        guard let url = selectedURL else { return }
+                        Task {
+                            await viewModel.openRepo(
+                                url: url,
+                                name: repoName.isEmpty ? url.lastPathComponent : repoName
+                            )
+                            isPresented = false
+                        }
+                    }
+                    .disabled(selectedURL == nil || validationError != nil)
+                }
+            }
+            .fileImporter(
+                isPresented: $showingFilePicker,
+                allowedContentTypes: [.folder],
+                allowsMultipleSelection: false
+            ) { result in
+                switch result {
+                case .success(let urls):
+                    if let url = urls.first {
+                        // 需要获取安全访问权限
+                        guard url.startAccessingSecurityScopedResource() else {
+                            validationError = "无法访问所选文件夹"
+                            return
+                        }
+                        defer { url.stopAccessingSecurityScopedResource() }
+                        
+                        selectedURL = url
+                        if repoName.isEmpty {
+                            repoName = url.lastPathComponent
+                        }
+                        
+                        // 校验元信息
+                        if let error = RepoMetadataStore.validateMetadata(at: url) {
+                            validationError = "无法识别为青简仓库: \(error)"
+                        } else {
+                            validationError = nil
                         }
                     }
                 case .failure:

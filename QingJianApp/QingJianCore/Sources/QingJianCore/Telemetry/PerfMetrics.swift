@@ -16,9 +16,11 @@ public enum PerfMetric: String, Sendable {
     case appWarmStart = "app.warm_start"
     
     // Repo
+    case repoCreate = "repo.create"
     case repoOpen = "repo.open"
     case repoScan = "repo.scan"
     case repoWatch = "repo.watch"
+    case repoListLoad = "repo.list.load"
     
     // 笔记
     case noteOpen = "note.open"

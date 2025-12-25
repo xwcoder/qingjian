@@ -113,9 +113,71 @@ public actor RepoMetadataStore {
         cachedMetadata = nil
     }
     
+    // MARK: - Existence Check (T009)
+    
+    /// 检查元信息文件是否存在（不会自动创建）
+    public func exists() -> Bool {
+        FileManager.default.fileExists(atPath: metadataFileURL.path)
+    }
+    
+    /// 校验元信息文件是否存在且可解析
+    /// - Returns: `nil` 如果有效，否则返回错误原因
+    public func validate() -> String? {
+        let url = metadataFileURL
+        
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            return "元信息文件不存在"
+        }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            _ = try JSONDecoder().decode(RepoMetadata.self, from: data)
+            return nil
+        } catch {
+            return "元信息文件损坏: \(error.localizedDescription)"
+        }
+    }
+    
+    /// 确保元信息文件存在（不存在则写入默认值）
+    public func ensureExists() async throws {
+        guard !exists() else { return }
+        try await save(RepoMetadata())
+    }
+    
     // MARK: - Private
     
     private var metadataFileURL: URL {
         repoRootURL.appendingPathComponent(metadataFileName)
+    }
+}
+
+// MARK: - Static Utilities
+
+extension RepoMetadataStore {
+    
+    /// 元信息文件名
+    public static let metadataFileName = ".qingjian_metadata.json"
+    
+    /// 检查指定目录是否包含有效的元信息文件（纯函数，不创建 Store 实例）
+    public static func validateMetadata(at rootURL: URL) -> String? {
+        let url = rootURL.appendingPathComponent(metadataFileName)
+        
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            return "元信息文件不存在"
+        }
+        
+        do {
+            let data = try Data(contentsOf: url)
+            _ = try JSONDecoder().decode(RepoMetadata.self, from: data)
+            return nil
+        } catch {
+            return "元信息文件损坏: \(error.localizedDescription)"
+        }
+    }
+    
+    /// 检查指定目录是否包含元信息文件（纯函数）
+    public static func metadataExists(at rootURL: URL) -> Bool {
+        let url = rootURL.appendingPathComponent(metadataFileName)
+        return FileManager.default.fileExists(atPath: url.path)
     }
 }
