@@ -1,0 +1,29 @@
+# qingjian Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2025-12-25
+
+## Active Technologies
+
+- Swift 6+ + SwiftUI（跨端 UI）、Foundation（文件 I/O）、XCTest（单元/集成测试）；其它依赖在 Phase 0 研究后收敛（例如 Markdown 渲染方案） (001-qingjian-markdown-notes)
+
+## Project Structure
+
+```text
+src/
+tests/
+```
+
+## Commands
+
+# Add commands for Swift 6+
+
+## Code Style
+
+Swift 6+: Follow standard conventions
+
+## Recent Changes
+
+- 001-qingjian-markdown-notes: Added Swift 6+ + SwiftUI（跨端 UI）、Foundation（文件 I/O）、XCTest（单元/集成测试）；其它依赖在 Phase 0 研究后收敛（例如 Markdown 渲染方案）
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->
