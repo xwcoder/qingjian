@@ -53,5 +53,42 @@ public struct NoteDocument: Equatable, Sendable {
         }
         return fallback
     }
+    
+    // MARK: - Unsaved Changes Contract (T017)
+    
+    /// 检查当前内容是否与已保存版本不同
+    public func hasUnsavedChanges(currentContent: String) -> Bool {
+        return currentContent.hashValue != contentHash
+    }
+    
+    /// 创建一个标记为脏的副本（内容已修改）
+    public func markDirty() -> NoteDocument {
+        var copy = self
+        copy.isDirty = true
+        return copy
+    }
+    
+    /// 创建一个已保存状态的副本（更新 hash）
+    public func markSaved(newContent: String) -> NoteDocument {
+        NoteDocument(
+            note: note,
+            content: newContent,
+            contentHash: newContent.hashValue,
+            loadedAt: loadedAt,
+            isDirty: false
+        )
+    }
+}
+
+// MARK: - Unsaved Changes Action
+
+/// 未保存更改时的用户操作选择
+public enum UnsavedChangesAction: Sendable {
+    /// 保存更改后继续
+    case save
+    /// 放弃更改继续
+    case discard
+    /// 取消操作
+    case cancel
 }
 

@@ -74,7 +74,7 @@ public actor BrowseUseCases {
         return nodes
     }
     
-    // MARK: - UC-Browse-02: Open Note
+    // MARK: - UC-Browse-02: Open Note (T014)
     
     /// 打开笔记
     ///
@@ -95,6 +95,9 @@ public actor BrowseUseCases {
         let metadataStore = RepoMetadataStore(repoRootURL: rootURL)
         try? await metadataStore.addRecentNote(path: notePath)
         
+        // 发出 noteOpened 事件 (T014)
+        emitNoteOpened(repoId: repoId, path: notePath)
+        
         return document
     }
     
@@ -112,6 +115,35 @@ public actor BrowseUseCases {
     /// 获取缓存的目录树
     public func getCachedTree(repoId: String) -> RepoTreeSnapshot? {
         treeCache[repoId]
+    }
+    
+    // MARK: - Refresh Strategy (T009)
+    
+    /// 通知仓库内容变化（写入操作后调用）
+    ///
+    /// 统一的"写入后刷新"策略：
+    /// 1. 清除对应仓库的目录树缓存
+    /// 2. 发出 `repoChanged` 事件通知订阅者
+    ///
+    /// - Parameters:
+    ///   - repoId: 仓库 ID
+    ///   - affectedPaths: 受影响的路径列表
+    public func notifyRepoChanged(repoId: String, affectedPaths: [String]) {
+        // 清除缓存
+        invalidateTreeCache(repoId: repoId)
+        
+        // 发出事件
+        eventBus?.emit(.repoChanged(repoId: repoId, affectedPaths: affectedPaths))
+    }
+    
+    /// 发出笔记已打开事件
+    public func emitNoteOpened(repoId: String, path: String) {
+        eventBus?.emit(.noteOpened(repoId: repoId, path: path))
+    }
+    
+    /// 发出笔记已保存事件
+    public func emitNoteSaved(repoId: String, path: String) {
+        eventBus?.emit(.noteSaved(repoId: repoId, path: path))
     }
 }
 

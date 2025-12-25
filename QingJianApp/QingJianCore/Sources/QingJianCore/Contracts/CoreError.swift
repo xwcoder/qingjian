@@ -26,10 +26,27 @@ public enum CoreError: LocalizedError, Equatable, Sendable {
     /// Repo 不可用
     case repoUnavailable(id: String, reason: String?)
     
+    // MARK: - 目录错误
+    
+    /// 目录未找到
+    case folderNotFound(path: String)
+    
+    /// 目录已存在（重名冲突）
+    case folderAlreadyExists(path: String)
+    
+    /// 非法的目录移动（例如移动到自身或子目录）
+    case invalidFolderMove(path: String, reason: String)
+    
+    /// 目录非空（删除时未确认）
+    case folderNotEmpty(path: String)
+    
     // MARK: - 笔记错误
     
     /// 笔记未找到
     case noteNotFound(path: String)
+    
+    /// 笔记已存在（重名冲突）
+    case noteAlreadyExists(path: String)
     
     /// 笔记读取失败
     case noteReadFailed(path: String, reason: String)
@@ -90,8 +107,18 @@ public enum CoreError: LocalizedError, Equatable, Sendable {
             return "未找到仓库: \(id)"
         case .repoUnavailable(let id, let reason):
             return "仓库不可用: \(id)" + (reason.map { " - \($0)" } ?? "")
+        case .folderNotFound(let path):
+            return "未找到目录: \(path)"
+        case .folderAlreadyExists(let path):
+            return "目录已存在: \(path)"
+        case .invalidFolderMove(let path, let reason):
+            return "非法的目录移动: \(path) - \(reason)"
+        case .folderNotEmpty(let path):
+            return "目录非空: \(path)"
         case .noteNotFound(let path):
             return "未找到笔记: \(path)"
+        case .noteAlreadyExists(let path):
+            return "笔记已存在: \(path)"
         case .noteReadFailed(let path, let reason):
             return "笔记读取失败: \(path) - \(reason)"
         case .noteSaveFailed(let path, let reason):

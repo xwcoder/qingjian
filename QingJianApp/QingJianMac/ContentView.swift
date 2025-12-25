@@ -471,8 +471,12 @@ struct RepoTreeView: View {
     @State private var tree: RepoTreeSnapshot?
     @State private var isLoading = false
     @State private var error: String?
+    @State private var showingCreateNote = false
+    @State private var newNoteName = ""
+    @State private var selectedFolderPath: String = ""
     
     private let browseUseCases = BrowseUseCases()
+    private let editUseCases = EditUseCases()
     
     var body: some View {
         Group {
@@ -489,7 +493,10 @@ struct RepoTreeView: View {
                     TreeNodeListView(
                         nodes: tree.rootNodes,
                         selectedPath: $selectedNotePath,
-                        onNoteSelected: onNoteSelected
+                        onNoteSelected: onNoteSelected,
+                        repoId: repoId,
+                        rootURL: rootURL,
+                        onRefresh: { await loadTree(forceRefresh: true) }
                     )
                 }
                 .listStyle(.sidebar)
@@ -502,11 +509,38 @@ struct RepoTreeView: View {
             }
         }
         .navigationTitle("目录")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    newNoteName = ""
+                    selectedFolderPath = ""
+                    showingCreateNote = true
+                } label: {
+                    Image(systemName: "doc.badge.plus")
+                }
+                .help("新建笔记")
+            }
+        }
         .task(id: repoId) {
             await loadTree()
         }
         .refreshable {
             await loadTree(forceRefresh: true)
+        }
+        .sheet(isPresented: $showingCreateNote) {
+            CreateNoteSheet(
+                repoId: repoId,
+                rootURL: rootURL,
+                isPresented: $showingCreateNote,
+                noteName: $newNoteName,
+                folderPath: $selectedFolderPath,
+                folders: collectFolders(from: tree?.rootNodes ?? []),
+                onCreate: { path in
+                    Task {
+                        await createNote(at: path)
+                    }
+                }
+            )
         }
     }
     
@@ -526,6 +560,102 @@ struct RepoTreeView: View {
         
         isLoading = false
     }
+    
+    private func createNote(at path: String) async {
+        do {
+            let doc = try await editUseCases.createNote(
+                repoId: repoId,
+                rootURL: rootURL,
+                path: path,
+                initialContent: "# \(URL(fileURLWithPath: path).deletingPathExtension().lastPathComponent)\n\n",
+                browseUseCases: browseUseCases
+            )
+            // 刷新树并选中新笔记
+            await loadTree(forceRefresh: true)
+            selectedNotePath = doc.note.path
+            onNoteSelected(doc.note.path)
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+    
+    /// 从树节点中收集所有目录路径
+    private func collectFolders(from nodes: [TreeNode], prefix: String = "") -> [(path: String, name: String)] {
+        var result: [(path: String, name: String)] = [("", "根目录")]
+        
+        func collect(_ nodes: [TreeNode], prefix: String) {
+            for node in nodes {
+                if case .folder(let folder) = node {
+                    let path = prefix.isEmpty ? folder.name : "\(prefix)/\(folder.name)"
+                    result.append((path, path))
+                    collect(folder.children, prefix: path)
+                }
+            }
+        }
+        
+        collect(nodes, prefix: "")
+        return result
+    }
+}
+
+// MARK: - Create Note Sheet (T015)
+
+struct CreateNoteSheet: View {
+    let repoId: String
+    let rootURL: URL
+    @Binding var isPresented: Bool
+    @Binding var noteName: String
+    @Binding var folderPath: String
+    let folders: [(path: String, name: String)]
+    let onCreate: (String) -> Void
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("新建笔记")
+                .font(.title2)
+                .fontWeight(.semibold)
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("笔记名称")
+                    .font(.headline)
+                
+                TextField("输入笔记名称", text: $noteName)
+                    .textFieldStyle(.roundedBorder)
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("保存位置")
+                    .font(.headline)
+                
+                Picker("目录", selection: $folderPath) {
+                    ForEach(folders, id: \.path) { folder in
+                        Text(folder.name).tag(folder.path)
+                    }
+                }
+                .labelsHidden()
+            }
+            
+            HStack {
+                Button("取消") {
+                    isPresented = false
+                }
+                .keyboardShortcut(.escape)
+                
+                Spacer()
+                
+                Button("创建") {
+                    let fileName = noteName.hasSuffix(".md") ? noteName : "\(noteName).md"
+                    let path = folderPath.isEmpty ? fileName : "\(folderPath)/\(fileName)"
+                    onCreate(path)
+                    isPresented = false
+                }
+                .keyboardShortcut(.return)
+                .disabled(noteName.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+        }
+        .padding(24)
+        .frame(width: 400)
+    }
 }
 
 // MARK: - Tree Node List View
@@ -534,6 +664,9 @@ struct TreeNodeListView: View {
     let nodes: [TreeNode]
     @Binding var selectedPath: String?
     let onNoteSelected: (String) -> Void
+    var repoId: String = ""
+    var rootURL: URL = URL(fileURLWithPath: "/")
+    var onRefresh: (() async -> Void)? = nil
     
     var body: some View {
         ForEach(nodes) { node in
@@ -543,17 +676,112 @@ struct TreeNodeListView: View {
                     TreeNodeListView(
                         nodes: folder.children,
                         selectedPath: $selectedPath,
-                        onNoteSelected: onNoteSelected
+                        onNoteSelected: onNoteSelected,
+                        repoId: repoId,
+                        rootURL: rootURL,
+                        onRefresh: onRefresh
                     )
                 } label: {
                     Label(folder.name, systemImage: "folder.fill")
                         .foregroundStyle(.primary)
                 }
+                .contextMenu {
+                    FolderContextMenu(
+                        folder: folder,
+                        repoId: repoId,
+                        rootURL: rootURL,
+                        onRefresh: onRefresh
+                    )
+                }
                 
             case .note(let note):
                 Label(note.displayTitle, systemImage: "doc.text")
                     .tag(note.path)
+                    .contextMenu {
+                        NoteContextMenu(
+                            note: note,
+                            repoId: repoId,
+                            rootURL: rootURL,
+                            onRefresh: onRefresh
+                        )
+                    }
             }
+        }
+    }
+}
+
+// MARK: - Note Context Menu (T032)
+
+struct NoteContextMenu: View {
+    let note: NoteInfo
+    let repoId: String
+    let rootURL: URL
+    let onRefresh: (() async -> Void)?
+    
+    @State private var showingRename = false
+    @State private var showingDelete = false
+    @State private var newName = ""
+    
+    private let editUseCases = EditUseCases()
+    private let browseUseCases = BrowseUseCases()
+    
+    var body: some View {
+        Button {
+            newName = note.name.replacingOccurrences(of: ".md", with: "")
+            showingRename = true
+        } label: {
+            Label("重命名", systemImage: "pencil")
+        }
+        
+        Divider()
+        
+        Button(role: .destructive) {
+            showingDelete = true
+        } label: {
+            Label("删除", systemImage: "trash")
+        }
+    }
+}
+
+// MARK: - Folder Context Menu (T026)
+
+struct FolderContextMenu: View {
+    let folder: FolderInfo
+    let repoId: String
+    let rootURL: URL
+    let onRefresh: (() async -> Void)?
+    
+    @State private var showingRename = false
+    @State private var showingDelete = false
+    @State private var showingCreateSubfolder = false
+    @State private var newName = ""
+    
+    private let folderUseCases = FolderUseCases()
+    private let browseUseCases = BrowseUseCases()
+    
+    var body: some View {
+        Button {
+            newName = ""
+            showingCreateSubfolder = true
+        } label: {
+            Label("新建子目录", systemImage: "folder.badge.plus")
+        }
+        
+        Divider()
+        
+        Button {
+            newName = folder.name
+            showingRename = true
+        } label: {
+            Label("重命名", systemImage: "pencil")
+        }
+        
+        Divider()
+        
+        Button(role: .destructive) {
+            showingDelete = true
+        } label: {
+            Label("删除", systemImage: "trash")
         }
     }
 }

@@ -78,6 +78,24 @@ QingJianApp/
 
 **Structure Decision**: 采用“共享核心（QingJianCore）+ 平台薄 UI（QingJianIOS/QingJianMac）”结构；目录/笔记管理的文件系统语义、冲突与错误处理、元数据维护都在共享核心实现，平台层只负责交互与呈现，保证双端一致性。
 
+## Performance Budget (T035)
+
+| Metric | Target | Measurement Method | Status |
+|--------|--------|-------------------|--------|
+| `repo.scan` | < 500ms for 1000 notes | `PerfMetrics.measure()` in `BrowseUseCases.loadRepoTree` | ✅ Instrumented |
+| `note.open` | < 100ms | `PerfMetrics.measure()` in `BrowseUseCases.openNote` | ✅ Instrumented |
+| `note.save` | < 50ms | `PerfMetrics.measure()` in `EditUseCases.saveNote` | ✅ Instrumented |
+| `note.create` | < 100ms | `PerfMetrics.measure()` in `EditUseCases.createNote` | ✅ Instrumented |
+| `folder.create` | < 50ms | `PerfMetrics.measure()` in `FolderUseCases.createFolder` | ✅ Instrumented |
+| `folder.move` | < 100ms | `PerfMetrics.measure()` in `FolderUseCases.moveFolder` | ✅ Instrumented |
+| `folder.delete` | < 100ms | `PerfMetrics.measure()` in `FolderUseCases.deleteFolder` | ✅ Instrumented |
+| `editor.key_latency` | < 16ms | Platform-level input handler | 🔧 To be measured |
+
+**Debug Observation**: 所有核心操作已通过 `PerfMetrics` 埋点，DEBUG 模式下会打印到控制台：
+```
+📊 [note.open] 45.23ms ["repoId": "xxx", "path": "docs/readme.md"]
+```
+
 ## Complexity Tracking
 
 > **Fill ONLY if Constitution Check has violations that must be justified**

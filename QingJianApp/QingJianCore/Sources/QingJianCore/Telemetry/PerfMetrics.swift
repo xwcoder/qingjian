@@ -26,6 +26,16 @@ public enum PerfMetric: String, Sendable {
     case noteOpen = "note.open"
     case noteSave = "note.save"
     case noteSwitch = "note.switch"
+    case noteCreate = "note.create"
+    case noteRename = "note.rename"
+    case noteMove = "note.move"
+    case noteDelete = "note.delete"
+    
+    // 目录
+    case folderCreate = "folder.create"
+    case folderRename = "folder.rename"
+    case folderMove = "folder.move"
+    case folderDelete = "folder.delete"
     
     // 渲染
     case renderTotal = "render.total"

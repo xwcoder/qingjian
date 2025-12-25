@@ -113,6 +113,52 @@ public actor RepoMetadataStore {
         cachedMetadata = nil
     }
     
+    // MARK: - Path Migration & Cleanup (T006)
+    
+    /// 迁移路径前缀（目录/笔记移动/重命名后调用）
+    /// - Parameters:
+    ///   - oldPrefix: 旧路径前缀
+    ///   - newPrefix: 新路径前缀
+    public func migratePaths(from oldPrefix: String, to newPrefix: String) async throws {
+        var metadata = try await load()
+        metadata = RepoMetadataMigration.migratePaths(in: metadata, from: oldPrefix, to: newPrefix)
+        try await save(metadata)
+    }
+    
+    /// 清理不存在的路径
+    /// - Parameter existingPaths: 当前存在的路径集合
+    public func cleanupInvalidPaths(existingPaths: Set<String>) async throws {
+        var metadata = try await load()
+        metadata = RepoMetadataMigration.cleanupInvalidPaths(in: metadata, existingPaths: existingPaths)
+        try await save(metadata)
+    }
+    
+    /// 删除指定路径及其子路径相关的元数据
+    /// - Parameter deletedPath: 被删除的路径
+    public func removePathsUnder(deletedPath: String) async throws {
+        var metadata = try await load()
+        metadata = RepoMetadataMigration.removePathsUnder(in: metadata, deletedPath: deletedPath)
+        try await save(metadata)
+    }
+    
+    /// 从 recentNotes 中移除指定路径
+    /// - Parameter path: 要移除的路径
+    public func removeFromRecentNotes(path: String) async throws {
+        var metadata = try await load()
+        metadata = RepoMetadataMigration.removeFromRecentNotes(in: metadata, path: path)
+        try await save(metadata)
+    }
+    
+    /// 更新 recentNotes 中的路径（笔记重命名后调用）
+    /// - Parameters:
+    ///   - oldPath: 旧路径
+    ///   - newPath: 新路径
+    public func updateRecentNotePath(from oldPath: String, to newPath: String) async throws {
+        var metadata = try await load()
+        metadata = RepoMetadataMigration.updateRecentNotePath(in: metadata, from: oldPath, to: newPath)
+        try await save(metadata)
+    }
+    
     // MARK: - Existence Check (T009)
     
     /// 检查元信息文件是否存在（不会自动创建）

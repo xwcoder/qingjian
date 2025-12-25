@@ -438,8 +438,10 @@ struct RepoDetailView: View {
     @State private var selectedNotePath: String?
     @State private var isLoading = false
     @State private var error: String?
+    @State private var showingCreateNote = false
     
     private let browseUseCases = BrowseUseCases()
+    private let editUseCases = EditUseCases()
     
     var body: some View {
         Group {
@@ -456,7 +458,8 @@ struct RepoDetailView: View {
                     TreeNodeListView(
                         nodes: tree.rootNodes,
                         repoId: repo.id,
-                        rootURL: URL(fileURLWithPath: repo.rootPath)
+                        rootURL: URL(fileURLWithPath: repo.rootPath),
+                        onRefresh: { await loadTree(forceRefresh: true) }
                     )
                 }
             } else {
@@ -468,11 +471,32 @@ struct RepoDetailView: View {
             }
         }
         .navigationTitle(repo.displayName)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showingCreateNote = true
+                } label: {
+                    Image(systemName: "doc.badge.plus")
+                }
+            }
+        }
         .task {
             await loadTree()
         }
         .refreshable {
             await loadTree(forceRefresh: true)
+        }
+        .sheet(isPresented: $showingCreateNote) {
+            CreateNoteView(
+                repo: repo,
+                folders: collectFolders(from: tree?.rootNodes ?? []),
+                isPresented: $showingCreateNote,
+                onCreated: { path in
+                    Task {
+                        await loadTree(forceRefresh: true)
+                    }
+                }
+            )
         }
     }
     
@@ -492,6 +516,114 @@ struct RepoDetailView: View {
         
         isLoading = false
     }
+    
+    /// 从树节点中收集所有目录路径
+    private func collectFolders(from nodes: [TreeNode]) -> [(path: String, name: String)] {
+        var result: [(path: String, name: String)] = [("", "根目录")]
+        
+        func collect(_ nodes: [TreeNode], prefix: String) {
+            for node in nodes {
+                if case .folder(let folder) = node {
+                    let path = prefix.isEmpty ? folder.name : "\(prefix)/\(folder.name)"
+                    result.append((path, path))
+                    collect(folder.children, prefix: path)
+                }
+            }
+        }
+        
+        collect(nodes, prefix: "")
+        return result
+    }
+}
+
+// MARK: - Create Note View (T016)
+
+struct CreateNoteView: View {
+    let repo: RepoSummary
+    let folders: [(path: String, name: String)]
+    @Binding var isPresented: Bool
+    let onCreated: (String) -> Void
+    
+    @State private var noteName = ""
+    @State private var selectedFolder = ""
+    @State private var error: String?
+    @State private var isCreating = false
+    
+    private let editUseCases = EditUseCases()
+    private let browseUseCases = BrowseUseCases()
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("笔记名称", text: $noteName)
+                } header: {
+                    Text("名称")
+                } footer: {
+                    Text("将自动添加 .md 扩展名")
+                }
+                
+                Section {
+                    Picker("保存位置", selection: $selectedFolder) {
+                        ForEach(folders, id: \.path) { folder in
+                            Text(folder.name).tag(folder.path)
+                        }
+                    }
+                } header: {
+                    Text("位置")
+                }
+                
+                if let error {
+                    Section {
+                        Text(error)
+                            .foregroundStyle(.red)
+                    }
+                }
+            }
+            .navigationTitle("新建笔记")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("取消") {
+                        isPresented = false
+                    }
+                }
+                
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("创建") {
+                        Task {
+                            await createNote()
+                        }
+                    }
+                    .disabled(noteName.trimmingCharacters(in: .whitespaces).isEmpty || isCreating)
+                }
+            }
+        }
+    }
+    
+    private func createNote() async {
+        isCreating = true
+        error = nil
+        
+        let fileName = noteName.hasSuffix(".md") ? noteName : "\(noteName).md"
+        let path = selectedFolder.isEmpty ? fileName : "\(selectedFolder)/\(fileName)"
+        
+        do {
+            _ = try await editUseCases.createNote(
+                repoId: repo.id,
+                rootURL: URL(fileURLWithPath: repo.rootPath),
+                path: path,
+                initialContent: "# \(noteName)\n\n",
+                browseUseCases: browseUseCases
+            )
+            onCreated(path)
+            isPresented = false
+        } catch {
+            self.error = error.localizedDescription
+        }
+        
+        isCreating = false
+    }
 }
 
 // MARK: - Tree Node List View
@@ -500,6 +632,7 @@ struct TreeNodeListView: View {
     let nodes: [TreeNode]
     let repoId: String
     let rootURL: URL
+    var onRefresh: (() async -> Void)? = nil
     
     var body: some View {
         ForEach(nodes) { node in
@@ -509,11 +642,20 @@ struct TreeNodeListView: View {
                     TreeNodeListView(
                         nodes: folder.children,
                         repoId: repoId,
-                        rootURL: rootURL
+                        rootURL: rootURL,
+                        onRefresh: onRefresh
                     )
                 } label: {
                     Label(folder.name, systemImage: "folder.fill")
                         .foregroundStyle(.primary)
+                }
+                .swipeActions(edge: .trailing) {
+                    FolderSwipeActions(
+                        folder: folder,
+                        repoId: repoId,
+                        rootURL: rootURL,
+                        onRefresh: onRefresh
+                    )
                 }
                 
             case .note(let note):
@@ -527,7 +669,100 @@ struct TreeNodeListView: View {
                 } label: {
                     Label(note.displayTitle, systemImage: "doc.text")
                 }
+                .swipeActions(edge: .trailing) {
+                    NoteSwipeActions(
+                        note: note,
+                        repoId: repoId,
+                        rootURL: rootURL,
+                        onRefresh: onRefresh
+                    )
+                }
             }
+        }
+    }
+}
+
+// MARK: - Note Swipe Actions (T033)
+
+struct NoteSwipeActions: View {
+    let note: NoteInfo
+    let repoId: String
+    let rootURL: URL
+    let onRefresh: (() async -> Void)?
+    
+    @State private var showingDeleteConfirm = false
+    
+    private let editUseCases = EditUseCases()
+    private let browseUseCases = BrowseUseCases()
+    
+    var body: some View {
+        Button(role: .destructive) {
+            showingDeleteConfirm = true
+        } label: {
+            Label("删除", systemImage: "trash")
+        }
+        .confirmationDialog(
+            "删除笔记",
+            isPresented: $showingDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("删除", role: .destructive) {
+                Task {
+                    try? await editUseCases.deleteNote(
+                        repoId: repoId,
+                        rootURL: rootURL,
+                        path: note.path,
+                        browseUseCases: browseUseCases
+                    )
+                    await onRefresh?()
+                }
+            }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("确定要删除「\(note.displayTitle)」吗？此操作不可撤销。")
+        }
+    }
+}
+
+// MARK: - Folder Swipe Actions (T027)
+
+struct FolderSwipeActions: View {
+    let folder: FolderInfo
+    let repoId: String
+    let rootURL: URL
+    let onRefresh: (() async -> Void)?
+    
+    @State private var showingDeleteConfirm = false
+    
+    private let folderUseCases = FolderUseCases()
+    private let browseUseCases = BrowseUseCases()
+    
+    var body: some View {
+        Button(role: .destructive) {
+            showingDeleteConfirm = true
+        } label: {
+            Label("删除", systemImage: "trash")
+        }
+        .confirmationDialog(
+            "删除目录",
+            isPresented: $showingDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("删除（包含内容）", role: .destructive) {
+                Task {
+                    try? await folderUseCases.deleteFolder(
+                        repoId: repoId,
+                        rootURL: rootURL,
+                        path: folder.path,
+                        force: true,
+                        browseUseCases: browseUseCases
+                    )
+                    await onRefresh?()
+                }
+            }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("确定要删除「\(folder.name)」及其所有内容吗？此操作不可撤销。")
         }
     }
 }
