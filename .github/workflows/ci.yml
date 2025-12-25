@@ -1,0 +1,44 @@
+# 青简 (qingjian) CI Workflow
+#
+# 状态: 占位 - 后续实现阶段细化
+#
+# 计划覆盖:
+# - Swift Package (QingJianCore) 构建与测试
+# - macOS App 构建
+# - iOS App 构建
+# - 性能门禁（可选，见 quickstart.md）
+#
+# 参考: specs/001-qingjian-markdown-notes/quickstart.md
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-core:
+    name: Build & Test QingJianCore
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+
+      - name: Build QingJianCore
+        working-directory: QingJianApp/QingJianCore
+        run: swift build
+
+      - name: Test QingJianCore
+        working-directory: QingJianApp/QingJianCore
+        run: swift test
+
+  # TODO: 后续添加 macOS/iOS App 构建任务（需要 .xcodeproj 或 xcodegen）
+  # build-macos:
+  #   ...
+  # build-ios:
+  #   ...
+

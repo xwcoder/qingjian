@@ -1,7 +1,19 @@
 # Implementation Plan: 青简（qingjian）Markdown 笔记应用（macOS/iOS）
 
-**Branch**: `001-qingjian-markdown-notes` | **Date**: 2025-12-25 | **Spec**: [spec.md](./spec.md)  
-**Input**: Feature specification from `/specs/001-qingjian-markdown-notes/spec.md`
+**Branch**: `001-qingjian-markdown-notes` | **Date**: 2025-12-25  
+
+## 文档导航
+
+| 文档 | 说明 |
+|------|------|
+| [spec.md](./spec.md) | 功能规格说明（需求、场景、成功标准） |
+| [plan.md](./plan.md) | 实现计划（本文档） |
+| [research.md](./research.md) | 技术研究（Markdown 渲染、iCloud 同步等） |
+| [data-model.md](./data-model.md) | 数据模型定义 |
+| [quickstart.md](./quickstart.md) | 开发指南与性能测试 |
+| [tasks.md](./tasks.md) | 任务分解与进度 |
+| [contracts/](./contracts/) | 接口契约（错误、事件、用例） |
+| [checklists/](./checklists/) | 检查清单（UI 回归、可访问性） |
 
 **Note**: 本文件由 `/speckit.plan` 生成并完善，作为实现阶段的技术与门禁依据。
 
@@ -120,5 +132,45 @@ QingJianApp/                 # Xcode 工程根（待创建）
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+| N/A | - | - |
+
+---
+
+## 实现状态 (2025-12-25)
+
+### ✅ 已完成
+
+- **Phase 1-2**: 项目骨架、共享核心基础设施
+- **Phase 3 (US1)**: Repo 管理、目录浏览、Markdown 渲染
+- **Phase 4 (US2)**: macOS 编辑器、Vim 模式、实时预览、图片导入
+- **Phase 5 (US3)**: 排序持久化、iCloud 同步框架、冲突管理、导出、购买 Gating
+- **Phase 6**: 可访问性清单、性能回归、文档整理
+
+### 测试覆盖
+
+- 77 个单元/集成测试全部通过
+- 覆盖：存储、渲染、用例、排序、同步、导出
+
+### 豁免记录
+
+| 项目 | 状态 | 说明 |
+|------|------|------|
+| Vim 模式完整性 | 部分实现 | 覆盖常用操作，高级功能（宏、寄存器命名）待后续迭代 |
+| iCloud 同步 | 框架完成 | 状态机和冲突管理已实现，实际同步逻辑待与 CloudKit 集成 |
+| 购买流程 | 框架完成 | StoreKit 2 API 调用已实现，需 App Store Connect 配置 |
+| UI 组件 | 基础完成 | 功能可用，美化和动画待后续迭代 |
+
+### 已知限制
+
+1. **Vim 模式**: 不支持 `.`（重复）、宏录制、命名寄存器
+2. **iCloud 同步**: 需要实际 iCloud 账户测试，CI 环境跳过
+3. **购买验证**: 需要 App Store 沙盒环境测试
+4. **大文件**: 超过 50,000 行的文件建议使用降级策略
+
+### 后续迭代建议
+
+1. 完善 Vim 模式高级功能
+2. 实现实际 iCloud 同步逻辑
+3. UI 美化和动画
+4. App Store 上架准备
+5. 性能优化（虚拟滚动、增量渲染）

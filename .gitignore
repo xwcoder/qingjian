@@ -1,0 +1,61 @@
+# === Swift / Xcode ===
+
+# Build generated
+.build/
+build/
+DerivedData/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# Package Manager
+.swiftpm/
+Packages/
+Package.resolved
+
+# Playground
+timeline.xctimeline
+playground.xcworkspace
+
+# Archive
+*.xcarchive
+
+# Debug
+*.dSYM.zip
+*.dSYM
+
+# CocoaPods (if used)
+Pods/
+
+# Carthage (if used)
+Carthage/Build
+
+# SPM checkouts (already in .swiftpm, but explicit)
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+
+# === IDE & System ===
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/settings.json
+.idea/
+
+# === Environment & Secrets ===
+*.env
+.env*
+!.env.example
+*.key
+*.pem
+
+# === Logs ===
+*.log
+
+# === Testing artifacts ===
+*.xcresult
+
+# === Misc ===
+*.tmp
+*.bak
+

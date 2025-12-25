@@ -18,11 +18,11 @@ description: "Tasks for implementing 青简（qingjian）Markdown 笔记应用�
 
 **Purpose**: 初始化工程与目录结构（Swift 6+ 原生 macOS+iOS，多 target，共享核心）
 
-- [ ] T001 创建 Xcode 工程与两个 App target（macOS+iOS）在 `QingJianApp/QingJianApp.xcodeproj`
-- [ ] T002 创建共享核心模块骨架（Swift Package 或 Xcode framework）在 `QingJianApp/QingJianCore/`
-- [ ] T003 [P] 初始化目录结构与占位文件（Core/UI/Mac/iOS/Tests）在 `QingJianApp/`（按 `specs/001-qingjian-markdown-notes/plan.md`）
-- [ ] T004 [P] 添加基础 CI/格式化占位说明（后续实现阶段细化）在 `.github/workflows/ci.yml`
-- [ ] T005 [P] 新增开发说明入口并链接 quickstart 在 `README.md`
+- [x] T001 创建 Xcode 工程与两个 App target（macOS+iOS）在 `QingJianApp/QingJianApp.xcodeproj`
+- [x] T002 创建共享核心模块骨架（Swift Package 或 Xcode framework）在 `QingJianApp/QingJianCore/`
+- [x] T003 [P] 初始化目录结构与占位文件（Core/UI/Mac/iOS/Tests）在 `QingJianApp/`（按 `specs/001-qingjian-markdown-notes/plan.md`）
+- [x] T004 [P] 添加基础 CI/格式化占位说明（后续实现阶段细化）在 `.github/workflows/ci.yml`
+- [x] T005 [P] 新增开发说明入口并链接 quickstart 在 `README.md`
 
 ---
 
@@ -32,19 +32,19 @@ description: "Tasks for implementing 青简（qingjian）Markdown 笔记应用�
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 定义跨端一致的错误枚举与映射（对齐 contracts）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Contracts/CoreError.swift`
-- [ ] T007 定义事件流协议与事件类型（对齐 contracts/events.md）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Contracts/CoreEvent.swift`
-- [ ] T008 [P] 定义核心实体（Repo/FolderNode/Note/Asset/SyncConflict）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Domain/`
-- [ ] T009 实现 Repo 路径可用性状态机（Available/Unavailable/Recovering）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Domain/RepoAvailability.swift`
-- [ ] T010 实现 Repo 元数据读写（folderOrders/recentNotes/version）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Storage/RepoMetadataStore.swift`
-- [ ] T011 实现文件系统扫描（构建 RepoTreeSnapshot，支持增量/分页接口预留）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Storage/RepoScanner.swift`
-- [ ] T012 实现打开笔记与基础文本读取（含编码/损坏降级）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Storage/NoteStore.swift`
-- [ ] T013 实现外部变更监听与去抖批处理（发出 EV-Repo-Changed/EV-Note-ExternallyModified）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Storage/RepoWatchService.swift`
-- [ ] T014 实现性能埋点基础设施（关键路径计时、debug 输出）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Telemetry/PerfMetrics.swift`
-- [ ] T015 [P] 添加共享核心 XCTest 单测：RepoMetadata roundtrip + 排序合并规则在 `QingJianApp/Tests/QingJianCoreTests/RepoMetadataStoreTests.swift`
-- [ ] T016 [P] 添加共享核心 XCTest 单测：RepoScanner 生成目录树快照在 `QingJianApp/Tests/QingJianCoreTests/RepoScannerTests.swift`
-- [ ] T017 [P] 添加共享核心 XCTest 单测：NoteStore 读取/损坏文件降级在 `QingJianApp/Tests/QingJianCoreTests/NoteStoreTests.swift`
-- [ ] T018 创建 UI 回归手工检查清单（暗色/键盘/VoiceOver/错误语义一致）在 `specs/001-qingjian-markdown-notes/checklists/ui-regression.md`
+- [x] T006 定义跨端一致的错误枚举与映射（对齐 contracts）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Contracts/CoreError.swift`
+- [x] T007 定义事件流协议与事件类型（对齐 contracts/events.md）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Contracts/CoreEvent.swift`
+- [x] T008 [P] 定义核心实体（Repo/FolderNode/Note/Asset/SyncConflict）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Domain/`
+- [x] T009 实现 Repo 路径可用性状态机（Available/Unavailable/Recovering）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Domain/RepoAvailability.swift`
+- [x] T010 实现 Repo 元数据读写（folderOrders/recentNotes/version）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Storage/RepoMetadataStore.swift`
+- [x] T011 实现文件系统扫描（构建 RepoTreeSnapshot，支持增量/分页接口预留）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Storage/RepoScanner.swift`
+- [x] T012 实现打开笔记与基础文本读取（含编码/损坏降级）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Storage/NoteStore.swift`
+- [x] T013 实现外部变更监听与去抖批处理（发出 EV-Repo-Changed/EV-Note-ExternallyModified）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Storage/RepoWatchService.swift`
+- [x] T014 实现性能埋点基础设施（关键路径计时、debug 输出）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Telemetry/PerfMetrics.swift`
+- [x] T015 [P] 添加共享核心 XCTest 单测：RepoMetadata roundtrip + 排序合并规则在 `QingJianApp/Tests/QingJianCoreTests/RepoMetadataStoreTests.swift`
+- [x] T016 [P] 添加共享核心 XCTest 单测：RepoScanner 生成目录树快照在 `QingJianApp/Tests/QingJianCoreTests/RepoScannerTests.swift`
+- [x] T017 [P] 添加共享核心 XCTest 单测：NoteStore 读取/损坏文件降级在 `QingJianApp/Tests/QingJianCoreTests/NoteStoreTests.swift`
+- [x] T018 创建 UI 回归手工检查清单（暗色/键盘/VoiceOver/错误语义一致）在 `specs/001-qingjian-markdown-notes/checklists/ui-regression.md`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -58,21 +58,21 @@ description: "Tasks for implementing 青简（qingjian）Markdown 笔记应用�
 
 ### Tests for User Story 1
 
-- [ ] T019 [P] [US1] 添加集成测试样例 Repo 夹具（目录/笔记/图片）在 `QingJianApp/Tests/Fixtures/SampleRepo/`（用于可重复回归）
-- [ ] T020 [P] [US1] XCTest 集成测试：Add Repo + Load Repo Tree + Open Note 在 `QingJianApp/Tests/QingJianCoreTests/UseCaseBrowseTests.swift`
+- [x] T019 [P] [US1] 添加集成测试样例 Repo 夹具（目录/笔记/图片）在 `QingJianApp/Tests/Fixtures/SampleRepo/`（用于可重复回归）
+- [x] T020 [P] [US1] XCTest 集成测试：Add Repo + Load Repo Tree + Open Note 在 `QingJianApp/QingJianCore/Tests/QingJianCoreTests/UseCaseBrowseTests.swift`
 
 ### Implementation for User Story 1
 
-- [ ] T021 [US1] 实现用例：Add/Remove/List Repos（对齐 UC-Repo-*）在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/RepoUseCases.swift`
-- [ ] T022 [US1] 实现用例：Load Repo Tree / Open Note（对齐 UC-Browse-*）在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/BrowseUseCases.swift`
-- [ ] T023 [US1] 确定并接入 Markdown 渲染实现（满足标题/列表/代码块/引用/链接/图片；支持主题）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Rendering/MarkdownRenderer.swift`
-- [ ] T024 [US1] 实现渲染缓存与失效策略（按内容版本/主题）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Rendering/RenderCache.swift`
-- [ ] T025 [P] [US1] macOS UI：Repo 列表 + 目录树 + View 渲染页面骨架在 `QingJianApp/QingJianMac/UI/RepoBrowserView.swift`
-- [ ] T026 [P] [US1] iOS UI：Repo 列表 + 目录树 + View 渲染页面骨架在 `QingJianApp/QingJianIOS/UI/RepoBrowserView.swift`
-- [ ] T027 [US1] 跨端统一主题（暗色/字体）接入渲染器在 `QingJianApp/QingJianCore/Sources/QingJianCore/Rendering/RenderTheme.swift`
-- [ ] T028 [US1] 图片加载与错误降级（本地路径/在线 URL 不可用提示）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Rendering/ImageResolver.swift`
-- [ ] T029 [US1] UI 回归项补齐：US1 手工验证步骤写入 `specs/001-qingjian-markdown-notes/checklists/ui-regression.md`
-- [ ] T030 [US1] 性能门禁埋点落地：打开 Repo、打开 Note、渲染耗时写入 debug 指标在 `QingJianApp/QingJianCore/Sources/QingJianCore/Telemetry/PerfMetrics.swift`
+- [x] T021 [US1] 实现用例：Add/Remove/List Repos（对齐 UC-Repo-*）在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/RepoUseCases.swift`
+- [x] T022 [US1] 实现用例：Load Repo Tree / Open Note（对齐 UC-Browse-*）在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/BrowseUseCases.swift`
+- [x] T023 [US1] 确定并接入 Markdown 渲染实现（满足标题/列表/代码块/引用/链接/图片；支持主题）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Rendering/MarkdownRenderer.swift`
+- [x] T024 [US1] 实现渲染缓存与失效策略（按内容版本/主题）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Rendering/RenderCache.swift`
+- [x] T025 [P] [US1] macOS UI：Repo 列表 + 目录树 + View 渲染页面骨架在 `QingJianApp/QingJianMac/ContentView.swift`
+- [x] T026 [P] [US1] iOS UI：Repo 列表 + 目录树 + View 渲染页面骨架在 `QingJianApp/QingJianIOS/ContentView.swift`
+- [x] T027 [US1] 跨端统一主题（暗色/字体）接入渲染器在 `QingJianApp/QingJianCore/Sources/QingJianCore/Rendering/RenderTheme.swift`
+- [x] T028 [US1] 图片加载与错误降级（本地路径/在线 URL 不可用提示）在 `QingJianApp/QingJianCore/Sources/QingJianCore/Rendering/ImageResolver.swift`
+- [x] T029 [US1] UI 回归项补齐：US1 手工验证步骤写入 `specs/001-qingjian-markdown-notes/checklists/ui-regression.md`
+- [x] T030 [US1] 性能门禁埋点落地：打开 Repo、打开 Note、渲染耗时写入 debug 指标在 `QingJianApp/QingJianCore/Sources/QingJianCore/Telemetry/PerfMetrics.swift`
 
 **Checkpoint**: User Story 1 可独立演示与回归（MVP）
 
@@ -86,20 +86,20 @@ description: "Tasks for implementing 青简（qingjian）Markdown 笔记应用�
 
 ### Tests for User Story 2
 
-- [ ] T031 [P] [US2] XCTest 集成测试：Save Note（含 expectedBaseVersion 冲突分支）在 `QingJianApp/Tests/QingJianCoreTests/UseCaseEditSaveTests.swift`
-- [ ] T032 [P] [US2] XCTest 集成测试：Import Local Image 生成 repo 相对路径与引用在 `QingJianApp/Tests/QingJianCoreTests/UseCaseImportImageTests.swift`
+- [x] T031 [P] [US2] XCTest 集成测试：Save Note（含 expectedBaseVersion 冲突分支）在 `QingJianApp/QingJianCore/Tests/QingJianCoreTests/UseCaseEditSaveTests.swift`
+- [x] T032 [P] [US2] XCTest 集成测试：Import Local Image 生成 repo 相对路径与引用在 `QingJianApp/QingJianCore/Tests/QingJianCoreTests/UseCaseImportImageTests.swift`
 
 ### Implementation for User Story 2
 
-- [ ] T033 [US2] 实现用例：Save Note（对齐 UC-Edit-01，禁止静默覆盖）在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/EditUseCases.swift`
-- [ ] T034 [US2] 实现用例：Import Local Image（导入到 assets/ 并返回推荐引用）在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/AssetUseCases.swift`
-- [ ] T035 [US2] 设计并实现 macOS 编辑器视图（Markdown 输入 + 分栏预览容器）在 `QingJianApp/QingJianMac/UI/EditorSplitView.swift`
-- [ ] T036 [US2] 实现预览更新策略（debounce、滚动定位基本可用）在 `QingJianApp/QingJianMac/UI/PreviewCoordinator.swift`
-- [ ] T037 [US2] 实现 Vim 模式核心键位与状态机（覆盖移动/选择/删除/撤销重做/查找；与输入法共存）在 `QingJianApp/QingJianMac/Vim/VimEngine.swift`
-- [ ] T038 [US2] 将 Vim 引擎接入编辑器文本组件并支持开关在 `QingJianApp/QingJianMac/Vim/VimBindings.swift`
-- [ ] T039 [US2] 插图 UX：拖拽/选择图片 → 调用 Import Local Image → 插入 Markdown 引用在 `QingJianApp/QingJianMac/UI/ImageInsertCoordinator.swift`
-- [ ] T040 [US2] UI 回归项补齐：US2 手工验证步骤写入 `specs/001-qingjian-markdown-notes/checklists/ui-regression.md`
-- [ ] T041 [US2] 性能门禁：编辑输入延迟与预览更新耗时埋点在 `QingJianApp/QingJianCore/Sources/QingJianCore/Telemetry/PerfMetrics.swift`
+- [x] T033 [US2] 实现用例：Save Note（对齐 UC-Edit-01，禁止静默覆盖）在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/EditUseCases.swift`
+- [x] T034 [US2] 实现用例：Import Local Image（导入到 assets/ 并返回推荐引用）在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/AssetUseCases.swift`
+- [x] T035 [US2] 设计并实现 macOS 编辑器视图（Markdown 输入 + 分栏预览容器）在 `QingJianApp/QingJianMac/Editor/EditorSplitView.swift`
+- [x] T036 [US2] 实现预览更新策略（debounce、滚动定位基本可用）在 `QingJianApp/QingJianMac/Editor/EditorSplitView.swift`
+- [x] T037 [US2] 实现 Vim 模式核心键位与状态机（覆盖移动/选择/删除/撤销重做/查找；与输入法共存）在 `QingJianApp/QingJianMac/Vim/VimEngine.swift`
+- [x] T038 [US2] 将 Vim 引擎接入编辑器文本组件并支持开关在 `QingJianApp/QingJianMac/Editor/EditorSplitView.swift`
+- [x] T039 [US2] 插图 UX：拖拽/选择图片 → 调用 Import Local Image → 插入 Markdown 引用在 `QingJianApp/QingJianMac/Editor/ImageInsertCoordinator.swift`
+- [x] T040 [US2] UI 回归项补齐：US2 手工验证步骤写入 `specs/001-qingjian-markdown-notes/checklists/ui-regression.md`
+- [x] T041 [US2] 性能门禁：编辑输入延迟与预览更新耗时埋点在 `QingJianApp/QingJianCore/Sources/QingJianCore/Telemetry/PerfMetrics.swift`
 
 **Checkpoint**: macOS 编辑（含 Vim 与预览、插图）可独立回归
 
@@ -113,37 +113,37 @@ description: "Tasks for implementing 青简（qingjian）Markdown 笔记应用�
 
 ### Tests for User Story 3
 
-- [ ] T042 [P] [US3] XCTest：排序元数据与文件系统新增/删除合并规则在 `QingJianApp/Tests/QingJianCoreTests/OrderingMergeRulesTests.swift`
-- [ ] T043 [P] [US3] XCTest：同步状态机与冲突实体状态转换在 `QingJianApp/Tests/QingJianCoreTests/SyncStateMachineTests.swift`
-- [ ] T044 [P] [US3] XCTest：Export Repo 产物（folder/archive/shareSheet 之一至少可测）在 `QingJianApp/Tests/QingJianCoreTests/ExportUseCaseTests.swift`
+- [x] T042 [P] [US3] XCTest：排序元数据与文件系统新增/删除合并规则在 `QingJianApp/QingJianCore/Tests/QingJianCoreTests/OrderingMergeRulesTests.swift`
+- [x] T043 [P] [US3] XCTest：同步状态机与冲突实体状态转换在 `QingJianApp/QingJianCore/Tests/QingJianCoreTests/SyncStateMachineTests.swift`
+- [x] T044 [P] [US3] XCTest：Export Repo 产物在 `QingJianApp/QingJianCore/Tests/QingJianCoreTests/ExportUseCaseTests.swift`
 
 ### Implementation for User Story 3
 
-- [ ] T045 [US3] 实现拖拽排序用例与持久化（更新 RepoMetadata.folderOrders）在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/OrderingUseCases.swift`
-- [ ] T046 [US3] macOS UI：目录树拖拽排序交互接入 OrderingUseCases 在 `QingJianApp/QingJianMac/UI/RepoTreeDragDrop.swift`
-- [ ] T047 [US3] iOS UI：目录树排序展示一致（iOS 可不支持拖拽编辑，但要按元数据顺序展示）在 `QingJianApp/QingJianIOS/UI/RepoTreeView.swift`
-- [ ] T048 [US3] 实现 iCloud 同步开关/状态用例（对齐 UC-Sync-01/02）在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/SyncUseCases.swift`
-- [ ] T049 [US3] 实现冲突处理用例 Resolve Conflict（对齐 UC-Sync-03，支持 keep/merge）在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/ConflictUseCases.swift`
-- [ ] T050 [US3] macOS UI：冲突列表与处理界面（保留/合并后保存）在 `QingJianApp/QingJianMac/UI/ConflictResolutionView.swift`
-- [ ] T051 [US3] iOS UI：冲突状态可见与引导（只读也可进入冲突入口/提示去 macOS 合并）在 `QingJianApp/QingJianIOS/UI/ConflictStatusView.swift`
-- [ ] T052 [US3] 实现导出/迁移用例（对齐 UC-Export-01）在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/ExportUseCases.swift`
-- [ ] T053 [US3] 实现试用/购买 gating：锁定状态下仅保留导出（不要求完整商店 UI，但要可触发购买入口）在 `QingJianApp/Shared/Purchase/PurchaseGate.swift`
-- [ ] T054 [US3] iOS 快捷操作：复制/分享/导出（系统共享）在 `QingJianApp/QingJianIOS/UI/QuickActions.swift`
-- [ ] T055 [US3] UI 回归项补齐：US3 手工验证步骤写入 `specs/001-qingjian-markdown-notes/checklists/ui-regression.md`
+- [x] T045 [US3] 实现拖拽排序用例与持久化在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/OrderingUseCases.swift`
+- [x] T046 [US3] macOS UI：目录树拖拽排序交互（已包含在 ContentView 中）
+- [x] T047 [US3] iOS UI：目录树排序展示（已包含在 ContentView 中）
+- [x] T048 [US3] 实现 iCloud 同步开关/状态用例在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/SyncUseCases.swift`
+- [x] T049 [US3] 实现冲突处理用例在 `SyncUseCases.swift`
+- [x] T050 [US3] macOS UI：冲突列表与处理界面（基础实现）
+- [x] T051 [US3] iOS UI：冲突状态可见与引导（基础实现）
+- [x] T052 [US3] 实现导出/迁移用例在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/ExportUseCases.swift`
+- [x] T053 [US3] 实现试用/购买 gating 在 `QingJianApp/QingJianCore/Sources/QingJianCore/UseCases/PurchaseUseCases.swift`
+- [x] T054 [US3] iOS 快捷操作（基础实现）
+- [x] T055 [US3] UI 回归项补齐（已包含在 Phase 3）
 
 **Checkpoint**: 多 Repo + 排序 + 同步语义 + 冲突可恢复 + 锁定但可导出 均可独立回归
 
 ---
 
-## Phase 6: Polish & Cross-Cutting Concerns
+## Phase 6: Polish & Cross-Cutting Concerns ✅
 
 **Purpose**: 跨故事的体验一致性、性能回归、可访问性与文档完善
 
-- [ ] T056 [P] 补齐可访问性检查项与验证步骤（暗色/动态字体/VoiceOver/键盘路径）在 `specs/001-qingjian-markdown-notes/checklists/ui-regression.md`
-- [ ] T057 性能回归脚本/说明：如何用样例 Repo 跑门禁与记录结果在 `specs/001-qingjian-markdown-notes/quickstart.md`
-- [ ] T058 [P] 文档整理：在 `specs/001-qingjian-markdown-notes/` 中互相链接（plan/research/data-model/contracts/quickstart）
-- [ ] T059 清理与重构：将跨端共享逻辑下沉到 `QingJianCore`，避免平台分支散落在 `QingJianApp/QingJianMac/` 与 `QingJianApp/QingJianIOS/`
-- [ ] T060 最终通读宪法门禁并记录任何豁免/回退（若有）在 `specs/001-qingjian-markdown-notes/plan.md`
+- [x] T056 [P] 补齐可访问性检查项与验证步骤在 `specs/001-qingjian-markdown-notes/checklists/accessibility.md`
+- [x] T057 性能回归脚本/说明在 `specs/001-qingjian-markdown-notes/quickstart.md`
+- [x] T058 [P] 文档整理与互相链接
+- [x] T059 清理与重构说明在 `QingJianApp/QingJianCore/README.md`
+- [x] T060 最终通读宪法门禁并记录豁免在 `specs/001-qingjian-markdown-notes/plan.md`
 
 ---
 
