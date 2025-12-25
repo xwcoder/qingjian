@@ -11,30 +11,168 @@
 
 ## Prerequisites
 
-- macOS 开发机
-- Xcode（支持 Swift 6+ 的版本）
+- macOS 14.0+ 开发机
+- Xcode 15.0+（支持 Swift 6）
 
 ---
 
-## Project Layout (目标结构)
-
-> 说明：当前仓库尚未初始化工程，本结构是实现阶段要创建的目标布局。
+## Project Layout
 
 ```text
 QingJianApp/
-├── QingJianCore/
-├── QingJianMac/
-├── QingJianIOS/
+├── QingJian.xcworkspace       # Xcode Workspace
+├── QingJian.xcodeproj         # Xcode Project
+├── QingJianCore/              # 共享核心模块 (Swift Package)
+│   ├── Package.swift
+│   └── Sources/
+├── QingJianMac/               # macOS 应用
+│   ├── QingJianMacApp.swift
+│   ├── ContentView.swift
+│   ├── Editor/
+│   └── Vim/
+├── QingJianIOS/               # iOS 应用
+│   ├── QingJianIOSApp.swift
+│   └── ContentView.swift
 └── Tests/
 ```
 
 ---
 
-## Run (local)
+## 方式一：使用 Xcode 打开（推荐）
 
-1. 打开 Xcode 工程（实现阶段创建后补充具体路径）
-2. 选择 `QingJianMac` scheme 运行 macOS 版
-3. 选择 `QingJianIOS` scheme 运行 iOS 版（模拟器或真机）
+### 1. 打开 Workspace
+
+```bash
+cd /path/to/qingjian/QingJianApp
+open QingJian.xcworkspace
+```
+
+或者双击 `QingJian.xcworkspace` 文件。
+
+### 2. 选择 Scheme
+
+- **QingJianMac**: 运行 macOS 版本
+- **QingJianIOS**: 运行 iOS 版本
+
+### 3. 构建运行
+
+- 快捷键: `⌘R` (Run)
+- 快捷键: `⌘B` (Build only)
+- 快捷键: `⌘U` (Run tests)
+
+### 4. 调试
+
+- 设置断点: 点击代码行号左侧
+- 查看变量: Debug area (`⇧⌘Y`)
+- 控制台: 查看 `print()` 输出和性能日志
+
+---
+
+## 方式二：从零创建 Xcode 工程
+
+如果 `.xcodeproj` 文件不可用或需要重新创建：
+
+### 1. 创建 Workspace
+
+```
+File > New > Workspace
+保存为: QingJianApp/QingJian.xcworkspace
+```
+
+### 2. 添加 Swift Package
+
+```
+File > Add Package Dependencies...
+选择: Add Local...
+路径: QingJianApp/QingJianCore
+```
+
+### 3. 创建 macOS App Target
+
+```
+File > New > Project...
+模板: macOS > App
+名称: QingJianMac
+语言: Swift
+界面: SwiftUI
+```
+
+配置:
+- Bundle Identifier: `com.qingjian.mac`
+- Deployment Target: macOS 14.0
+- Swift Version: 6.0
+
+添加依赖:
+```
+Project Settings > QingJianMac > Frameworks
+添加: QingJianCore
+```
+
+### 4. 创建 iOS App Target
+
+```
+File > New > Target...
+模板: iOS > App
+名称: QingJianIOS
+语言: Swift
+界面: SwiftUI
+```
+
+配置:
+- Bundle Identifier: `com.qingjian.ios`
+- Deployment Target: iOS 17.0
+- Swift Version: 6.0
+
+添加依赖:
+```
+Project Settings > QingJianIOS > Frameworks
+添加: QingJianCore
+```
+
+### 5. 配置 Entitlements (macOS)
+
+创建 `QingJianMac.entitlements`:
+- App Sandbox: YES
+- User Selected File (Read/Write): YES
+- iCloud: CloudDocuments
+
+---
+
+## 使用命令行构建
+
+### 构建 macOS 应用
+
+```bash
+cd QingJianApp
+xcodebuild -workspace QingJian.xcworkspace \
+  -scheme QingJianMac \
+  -configuration Debug \
+  build
+```
+
+### 构建 iOS 应用
+
+```bash
+cd QingJianApp
+xcodebuild -workspace QingJian.xcworkspace \
+  -scheme QingJianIOS \
+  -sdk iphonesimulator \
+  -configuration Debug \
+  build
+```
+
+### 运行单元测试
+
+```bash
+# 核心模块测试 (推荐)
+cd QingJianApp/QingJianCore
+swift test
+
+# 或通过 Xcode
+xcodebuild -workspace QingJian.xcworkspace \
+  -scheme QingJianCore \
+  test
+```
 
 ---
 

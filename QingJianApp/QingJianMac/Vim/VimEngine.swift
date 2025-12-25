@@ -47,6 +47,7 @@ public enum VimOperation {
 }
 
 /// Vim 引擎
+@MainActor
 public class VimEngine {
     
     /// 当前模式
@@ -707,8 +708,8 @@ public class VimEngine {
         let range = textView.selectedRange()
         let searchRange = NSRange(location: range.location + range.length, length: textView.string.utf16.count - range.location - range.length)
         
-        if let foundRange = (textView.string as NSString).range(of: searchPattern, options: [], range: searchRange),
-           foundRange.location != NSNotFound {
+        let foundRange = (textView.string as NSString).range(of: searchPattern, options: [], range: searchRange)
+        if foundRange.location != NSNotFound {
             textView.setSelectedRange(foundRange)
             textView.scrollRangeToVisible(foundRange)
         }
@@ -720,8 +721,8 @@ public class VimEngine {
         let range = textView.selectedRange()
         let searchRange = NSRange(location: 0, length: range.location)
         
-        if let foundRange = (textView.string as NSString).range(of: searchPattern, options: .backwards, range: searchRange),
-           foundRange.location != NSNotFound {
+        let foundRange = (textView.string as NSString).range(of: searchPattern, options: .backwards, range: searchRange)
+        if foundRange.location != NSNotFound {
             textView.setSelectedRange(foundRange)
             textView.scrollRangeToVisible(foundRange)
         }

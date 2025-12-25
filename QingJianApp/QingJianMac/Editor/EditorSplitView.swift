@@ -324,10 +324,12 @@ struct MarkdownEditorView: NSViewRepresentable {
         context.coordinator.vimModeEnabled = vimModeEnabled
     }
     
+    @MainActor
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
     
+    @MainActor
     class Coordinator: NSObject, NSTextViewDelegate {
         let parent: MarkdownEditorView
         var vimModeEnabled: Bool = false
